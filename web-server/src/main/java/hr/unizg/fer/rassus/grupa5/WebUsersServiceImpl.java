@@ -1,41 +1,41 @@
 package hr.unizg.fer.rassus.grupa5;
 
+import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestOperations;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-public class UserServiceImpl implements UserService{
-	
-	protected Logger logger = Logger.getLogger(UserServiceImpl.class.getName());
+
+@Service
+public class WebUsersServiceImpl implements WebUserService{
 	
 	@Autowired
 	@LoadBalanced
-	private RestTemplate restTemplate;
-
-	private String usersServiceUrl;
-
-	public UserServiceImpl(String usersServiceUrl) {
-		this.usersServiceUrl = usersServiceUrl.startsWith("http") ? usersServiceUrl
-				: "http://" + usersServiceUrl;
+	protected RestTemplate restTemplate;
+	
+	protected String usersServiceUrl;
+	
+	public WebUsersServiceImpl(String usersServiceUrl) {
+		this.usersServiceUrl = usersServiceUrl.startsWith("http") ? usersServiceUrl : "http://" + usersServiceUrl;
 	}
-
-	@Override
-	public User findById(Long id) {
-		logger.info("findById() invoked: for " + id);
-		return restTemplate.getForObject(usersServiceUrl + "/users/{id}",
-				User.class, id);
+	
+	public List<User> findById(Long userId) {
+		User[] users = null;
+		users = restTemplate.getForObject(usersServiceUrl + "/{userId}", User[].class, userId);
+		if (users == null || users.length == 0)
+			return null;
+		else
+			return Arrays.asList(users);
 	}
-
-	@Override
+	
 	public List<User> getAll() {
-		logger.info("getAll() invoked");
+//		logger.info("getAll() invoked");
 		ResponseEntity<List<User>> usersResponse =
 		        restTemplate.exchange(usersServiceUrl + "/users/",
 		                    HttpMethod.GET, null, new ParameterizedTypeReference<List<User>>() {

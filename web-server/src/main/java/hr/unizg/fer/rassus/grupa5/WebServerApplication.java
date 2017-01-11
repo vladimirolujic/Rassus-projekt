@@ -16,8 +16,11 @@ import org.springframework.web.client.RestTemplate;
 public class WebServerApplication {
 
 	public static final String WALKS_SERVICE_URL = "http://WALKS-SERVICE/walks";
+	public static final String REGISTRATIONS_SERVICE_URL = "http://REGISTRATIONS-SERVICE/registrations";
+	public static final String DOGS_SERVICE_URL = "http://DOGS-SERVICE/dogs";
 	public static final String USERS_SERVICE_URL = "http://USERS-SERVICE";
-
+	public static final String HOME_SERVICE_URL = "http://";
+	
 
 	/**
 	 * Run the application using Spring Boot and an embedded servlet engine.
@@ -50,6 +53,26 @@ public class WebServerApplication {
 	public WebWalksService walksService() {
 		return new WebWalksService(WALKS_SERVICE_URL);
 	}
+	
+	@Bean
+	public WebDogsService dogsService() {
+		return new WebDogsService(DOGS_SERVICE_URL);
+	}
+	
+	@Bean
+	public WebUserService usersService() {
+		return new WebUsersServiceImpl(USERS_SERVICE_URL);
+	}
+	
+	@Bean
+	public WebRegistrationsService registrationsService() {
+		return new WebRegistrationsService(REGISTRATIONS_SERVICE_URL);
+	}
+	
+	@Bean
+	public WebHomeService homeService() {
+		return new WebHomeService(HOME_SERVICE_URL);
+	}
 
 	/**
 	 * Create the controller, passing it the {@link WebWalksService} to use.
@@ -62,8 +85,23 @@ public class WebServerApplication {
 	}
 	
 	@Bean
-	public UserService userService(){
-		return new UserServiceImpl(USERS_SERVICE_URL);
+	public WebDogsController dogsController() {
+		return new WebDogsController(dogsService());
+	}
+	
+	@Bean
+	public WebUsersController usersController() {
+		return new WebUsersController();
+		}
+	
+	@Bean
+	public WebRegistrationsController registrationsController() {
+		return new WebRegistrationsController(registrationsService());
+	}
+	
+	@Bean
+	public WebHomeController homeController() {
+		return new WebHomeController(homeService());
 	}
 
 }

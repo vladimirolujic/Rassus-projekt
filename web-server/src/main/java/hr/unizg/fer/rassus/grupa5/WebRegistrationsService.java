@@ -2,40 +2,65 @@ package hr.unizg.fer.rassus.grupa5;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.Model;
 import org.springframework.web.client.RestTemplate;
 
 @Service
-public class WebWalksService {
-
+public class WebRegistrationsService {
+	
 	@Autowired
 	@LoadBalanced
 	protected RestTemplate restTemplate;
 
-	protected String walksServiceUrl;
+	protected String registrationsServiceUrl;
 
-	public WebWalksService(String walksServiceUrl) {
-		this.walksServiceUrl = walksServiceUrl.startsWith("http") ? walksServiceUrl : "http://" + walksServiceUrl;
+	public WebRegistrationsService(String registrationsServiceUrl) {
+		this.registrationsServiceUrl = registrationsServiceUrl.startsWith("http") ? registrationsServiceUrl : "http://" + registrationsServiceUrl;
 	}
 
-	Walk findById(Long id) {
-		return restTemplate.getForObject(walksServiceUrl + "/{id}", Walk.class, id);
+	List<Registration> getall() {
+
+		Registration[] regs = null;
+		List<Registration> listRegistrations = new ArrayList<Registration>();
+		regs = restTemplate.getForObject(registrationsServiceUrl + "/all", Registration[].class);
+		System.out.println("sve reg"+regs);
+		if (regs == null || regs.length == 0){
+			System.out.println("nema dohvacenih registr");
+			Registration emptyreg = new Registration();
+			listRegistrations.add(emptyreg);
+		}
+		else{
+			listRegistrations.addAll(Arrays.asList(regs));
+			//listRegistrations.add(regs);
+		}
+		return listRegistrations;
 	}
 	
-	List<Walk> findByDogId(Long dogId) {
-		Walk[] walks = null;
-		walks = restTemplate.getForObject(walksServiceUrl + "/dog/{dogId}", Walk[].class, dogId);
-		if (walks == null || walks.length == 0)
-			return null;
-		else
-			return Arrays.asList(walks);
+	
+	public String register(Registration reg) {
+		restTemplate.postForObject(registrationsServiceUrl + "/create", reg, Registration.class);
+		return "login";
 	}
 
+	public String login(Login login) {
+		Login log=restTemplate.postForObject(registrationsServiceUrl + "/login", login, Login.class);
+		if (log==null)
+			return "login";
+		else
+			return "succesfullogin";
+	}
+	
+	
+	
+	
+	
+	
+	/*
 	List<Walk> findByWalkerId(Long walkerId) {
 		Walk[] walks = null;
 		walks = restTemplate.getForObject(walksServiceUrl + "/walker/{walkerId}", Walk[].class, walkerId);
@@ -60,6 +85,8 @@ public class WebWalksService {
 		walks = restTemplate.getForObject(walksServiceUrl + "/active", Walk[].class);
 		if (walks == null || walks.length == 0){
 			System.out.println("nema dohvacenih setnji");
+			Walk emptyWalk = new Walk();
+			listWalks.add(emptyWalk);
 		}
 		else{
 			listWalks.addAll(Arrays.asList(walks));
@@ -74,4 +101,5 @@ public class WebWalksService {
 	public Walk acceptOffer(Walk walk) {
 		return restTemplate.postForObject(walksServiceUrl + "/accept", walk, Walk.class);
 	}
+	*/
 }
